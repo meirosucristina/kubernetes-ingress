@@ -39,13 +39,17 @@ func runServer(port string, registry prometheus.Gatherer) {
 	http.Handle(metricsEndpoint, promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`<html>
+		_, err := w.Write([]byte(`<html>
 			<head><title>NGINX Ingress Controller</title></head>
 			<body>
 			<h1>NGINX Ingress Controller</h1>
 			<p><a href='/metrics'>Metrics</a></p>
 			</body>
 			</html>`))
+
+		if err != nil {
+			glog.Fatalf("Error in Prometheus listener server: %v", err)
+		}
 	})
 	address := fmt.Sprintf(":%v", port)
 	glog.Infof("Starting Prometheus listener on: %v%v", address, metricsEndpoint)
